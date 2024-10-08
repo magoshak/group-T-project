@@ -1,5 +1,67 @@
-
+package com.mycompany.personalbudget2;
 import java.util.Scanner;
+
+// Abstract class for Property (Base Class)
+abstract class Property {
+    abstract double calculateMonthlyCost();
+}
+
+// Rent class (Inherits Property)
+class Rent extends Property {
+    private double rentAmount;
+
+    public Rent(double rentAmount) {
+        this.rentAmount = rentAmount;
+    }
+
+    @Override
+    double calculateMonthlyCost() {
+        return rentAmount;
+    }
+}
+
+// HomeLoan class (Inherits Property)
+class HomeLoan extends Property {
+    private double loanAmount, monthlyInterestRate;
+    private int months;
+
+    public HomeLoan(double loanAmount, double monthlyInterestRate, int months) {
+        this.loanAmount = loanAmount;
+        this.monthlyInterestRate = monthlyInterestRate;
+        this.months = months;
+    }
+
+    @Override
+    double calculateMonthlyCost() {
+        return loanAmount * (monthlyInterestRate * Math.pow(1 + monthlyInterestRate, months)) /
+                (Math.pow(1 + monthlyInterestRate, months) - 1);
+    }
+}
+
+// Abstract class for Vehicle (Base Class)
+abstract class Vehicle {
+    abstract double calculateMonthlyCost();
+}
+
+// Car class (Inherits Vehicle)
+class Car extends Vehicle {
+    private double vehicleLoanAmount, vehicleMonthlyInterestRate, insurance;
+    private int vehicleLoanTerm;
+
+    public Car(double vehicleLoanAmount, double vehicleMonthlyInterestRate, int vehicleLoanTerm, double insurance) {
+        this.vehicleLoanAmount = vehicleLoanAmount;
+        this.vehicleMonthlyInterestRate = vehicleMonthlyInterestRate;
+        this.vehicleLoanTerm = vehicleLoanTerm;
+        this.insurance = insurance;
+    }
+
+    @Override
+    double calculateMonthlyCost() {
+        double monthlyPayment = vehicleLoanAmount * (vehicleMonthlyInterestRate * Math.pow(1 + vehicleMonthlyInterestRate, vehicleLoanTerm)) /
+                (Math.pow(1 + vehicleMonthlyInterestRate, vehicleLoanTerm) - 1);
+        return monthlyPayment + insurance;
+    }
+}
 
 public class Personalbudget2 {
 
@@ -9,7 +71,7 @@ public class Personalbudget2 {
         // Step 1: Enter gross income and tax
         System.out.println("Enter your monthly salary before tax: ");
         double grossIncome = sc.nextDouble();
-        
+
         System.out.println("Enter your monthly tax: ");
         double taxDeducted = sc.nextDouble();
         double incomeAfterTax = grossIncome - taxDeducted;
@@ -18,7 +80,7 @@ public class Personalbudget2 {
 
         // Step 2: Input monthly expenses
         double[] expenses = new double[5];
-        
+
         System.out.println("Enter money for groceries: ");
         expenses[0] = sc.nextDouble();
 
@@ -39,14 +101,17 @@ public class Personalbudget2 {
 
         // Step 3: Rent or Buy a property
         System.out.println("Do you want to rent or buy a property? (Enter 'rent' or 'buy')");
-        String choice = sc.nextLine();  // This works fine now as we have cleared the buffer
+        String choice = sc.nextLine();
 
-        double rent = 0;
+        Property property = null;
         double monthlyPayment = 0;
 
         if (choice.equalsIgnoreCase("rent")) {
             System.out.println("Enter the monthly rent amount: ");
-            rent = sc.nextDouble();
+            double rent = sc.nextDouble();
+            property = new Rent(rent);
+            monthlyPayment = property.calculateMonthlyCost();
+
             System.out.println("You are renting a property at: " + rent + " per month.");
 
         } else if (choice.equalsIgnoreCase("buy")) {
@@ -68,12 +133,9 @@ public class Personalbudget2 {
             }
 
             double loanAmount = purchasePrice - deposit;
-            System.out.println("Loan amount: " + loanAmount);
-
             double monthlyInterestRate = interestRate / 12;
-
-            monthlyPayment = loanAmount * (monthlyInterestRate * Math.pow(1 + monthlyInterestRate, months)) /
-                    (Math.pow(1 + monthlyInterestRate, months) - 1);
+            property = new HomeLoan(loanAmount, monthlyInterestRate, months);
+            monthlyPayment = property.calculateMonthlyCost();
 
             System.out.println("Your monthly mortgage payment is: " + monthlyPayment);
         } else {
@@ -82,7 +144,7 @@ public class Personalbudget2 {
         }
 
         // Step 4: Calculate total expenses
-        double totalExpenses = rent + monthlyPayment + taxDeducted;
+        double totalExpenses = taxDeducted + monthlyPayment;
         for (double expense : expenses) {
             totalExpenses += expense;
         }
@@ -97,12 +159,7 @@ public class Personalbudget2 {
         System.out.println("Do you want to buy a vehicle? (yes or no): ");
         String vehicleChoice = sc.nextLine();
 
-        if (vehicleChoice.equalsIgnoreCase("no")) {
-            System.out.println("You have chosen not to buy a vehicle.");
-        } else if (vehicleChoice.equalsIgnoreCase("yes")) {
-            System.out.print("Enter model and make: ");
-            String modelAndMake = sc.nextLine();
-
+        if (vehicleChoice.equalsIgnoreCase("yes")) {
             System.out.print("Enter purchase price of the vehicle: ");
             double vehiclePurchasePrice = sc.nextDouble();
 
@@ -120,11 +177,9 @@ public class Personalbudget2 {
             double vehicleLoanAmount = vehiclePurchasePrice - vehicleTotalDeposit;
             double vehicleMonthlyInterestRate = (vehicleAnnualInterestRate / 100) / 12;
 
-            double vehicleMonthlyPayment = vehicleLoanAmount * (vehicleMonthlyInterestRate * Math.pow(1 + vehicleMonthlyInterestRate, vehicleLoanTerm)) /
-                    (Math.pow(1 + vehicleMonthlyInterestRate, vehicleLoanTerm) - 1);
+            Vehicle car = new Car(vehicleLoanAmount, vehicleMonthlyInterestRate, vehicleLoanTerm, insurance);
+            double totalVehicleCost = car.calculateMonthlyCost();
 
-            double totalVehicleCost = vehicleMonthlyPayment + insurance;
-            System.out.println("Your monthly vehicle payment is: " + vehicleMonthlyPayment);
             System.out.println("Your total monthly vehicle cost including insurance is: " + totalVehicleCost);
 
             // Update total expenses
@@ -134,7 +189,7 @@ public class Personalbudget2 {
             System.out.println("Updated total monthly expenses with vehicle cost: " + totalExpenses);
             System.out.println("Updated remaining income after all expenses: " + remainingIncome);
         } else {
-            System.out.println("Invalid input. Please choose 'yes' or 'no'.");
+            System.out.println("You have chosen not to buy a vehicle.");
         }
 
         sc.close(); // Close scanner
