@@ -1,9 +1,11 @@
+
 package com.mycompany.personalbudget2;
+
 import java.util.Scanner;
 
 // Abstract class for Property (Base Class)
 abstract class Property {
-    abstract double calculateMonthlyCost();
+abstract double calculateMonthlyCost();
 }
 
 // Rent class (Inherits Property)
