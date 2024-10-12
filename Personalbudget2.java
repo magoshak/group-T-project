@@ -1,9 +1,13 @@
 
-package com.mycompany.personalbudget2;
+package personalbudget2;
 
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Scanner;
-
-// Abstract class for Property (Base Class)
+    
+    // Abstract class for Property (Base Class)
 abstract class Property {
 abstract double calculateMonthlyCost();
 }
@@ -131,18 +135,25 @@ public class Personalbudget2 {
 
             if (!(months >= 240 && months <= 360)) {
                 System.out.println("The number of months must be between 240 and 360.");
+              
+                int repaymentMonths = sc.nextInt();
+
+            if (purchasePrice <= 0 || deposit < 0 || deposit > purchasePrice || 
+                interestRate < 0 || repaymentMonths < 240 || repaymentMonths > 360) {
+                System.out.println("Invalid input. Please ensure all values are valid.");
+                sc.close();
                 return;
             }
 
             double loanAmount = purchasePrice - deposit;
-            double monthlyInterestRate = interestRate / 12;
+            double monthlyInterestRate = interestRate/100 / 12;
             property = new HomeLoan(loanAmount, monthlyInterestRate, months);
             monthlyPayment = property.calculateMonthlyCost();
 
             System.out.println("Your monthly mortgage payment is: " + monthlyPayment);
-        } else {
-            System.out.println("Invalid choice. Please enter either 'rent' or 'buy'.");
-            return;
+        } 
+            else{ 
+                System.out.println("Invalid,Enter either buy or rent");
         }
 
         // Step 4: Calculate total expenses
@@ -156,12 +167,20 @@ public class Personalbudget2 {
         double remainingIncome = grossIncome - totalExpenses;
         System.out.println("Your remaining income after all expenses is: " + remainingIncome);
 
+        //part 2
         // Step 5: Ask about buying a vehicle
         sc.nextLine(); // Clear buffer again before nextLine()
         System.out.println("Do you want to buy a vehicle? (yes or no): ");
         String vehicleChoice = sc.nextLine();
 
         if (vehicleChoice.equalsIgnoreCase("yes")) {
+            
+            System.out.println("Enter Make of the vehicle:");
+            String make = sc.nextLine();
+            
+             System.out.println("Enter the model of the vehicle:");
+            String model = sc.nextLine();
+            
             System.out.print("Enter purchase price of the vehicle: ");
             double vehiclePurchasePrice = sc.nextDouble();
 
@@ -175,25 +194,39 @@ public class Personalbudget2 {
             double insurance = sc.nextDouble();
 
             // Calculate monthly vehicle payment
-            int vehicleLoanTerm = 60; // Assuming 5-year loan
             double vehicleLoanAmount = vehiclePurchasePrice - vehicleTotalDeposit;
             double vehicleMonthlyInterestRate = (vehicleAnnualInterestRate / 100) / 12;
+            int vehicleLoanTerm = 5 *12;
+            
+            double vehicleMonthlyLoanPayment = vehicleLoanAmount * (vehicleMonthlyInterestRate * Math.pow(1 + vehicleMonthlyInterestRate, vehicleLoanTerm)) 
+                                        / (Math.pow(1 + vehicleMonthlyInterestRate, vehicleLoanTerm) - 1);
 
-            Vehicle car = new Car(vehicleLoanAmount, vehicleMonthlyInterestRate, vehicleLoanTerm, insurance);
-            double totalVehicleCost = car.calculateMonthlyCost();
+    double vehicleMonthlyInsurance = insurance / 12;
+    double totalVehicleMonthlyCost = vehicleMonthlyLoanPayment + vehicleMonthlyInsurance;
 
-            System.out.println("Your total monthly vehicle cost including insurance is: " + totalVehicleCost);
+    //U SEDZA ARALI ZWI TSHI FHIRA 75% YA MUHOLO
+    if(totalVehicleMonthlyCost > 0.75 * grossIncome) {
+        System.out.println("Warning: Your total expenses exceed 75% of your income.");
+    }
+        List<Double> expense;
+                expense = new ArrayList<>();
+    expense.add(vehicleMonthlyLoanPayment);
+    expense.add(vehicleMonthlyInsurance);
+    expense.add(totalVehicleMonthlyCost);
 
-            // Update total expenses
-            totalExpenses += totalVehicleCost;
-            remainingIncome = grossIncome - totalExpenses;
+ 
+    Collections.sort(expense, Collections.reverseOrder());
 
-            System.out.println("Updated total monthly expenses with vehicle cost: " + totalExpenses);
-            System.out.println("Updated remaining income after all expenses: " + remainingIncome);
-        } else {
+    System.out.println("Expenses in descending order:");
+    for (double Expense : expense) {
+        System.out.printf("%.2f\n", Expense);      
+        } 
+    
+        }
+        else {
             System.out.println("You have chosen not to buy a vehicle.");
         }
-
-        sc.close(); // Close scanner
+        sc.close(); // Close scanner 
+        }
     }
 }
